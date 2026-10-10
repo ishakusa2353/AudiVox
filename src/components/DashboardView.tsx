@@ -9,8 +9,10 @@ import {
   ArrowUpRight,
   Clock,
   Sparkles,
+  Download,
 } from 'lucide-react';
 import { UserProfile, License, DeviceRecord, AppRelease, AuditLog } from '../types';
+import { downloadApkDirect } from '../utils/apkDownloader';
 
 interface DashboardViewProps {
   users: UserProfile[];
@@ -44,12 +46,28 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             সিস্টেম ওভারভিউ · লাইসেন্স অ্যাক্টিভেশন · ডিভাইস কন্ট্রোল · রিলিজ স্ট্যাটাস
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => downloadApkDirect('USER', '1.0.0')}
+            className="px-3.5 py-2 text-xs font-bold text-slate-950 bg-cyan-400 hover:bg-cyan-300 rounded-lg transition-colors flex items-center gap-1.5 whitespace-nowrap shadow-sm shadow-cyan-500/10 active:scale-95"
+            title="কোনো রিডাইরেক্ট ছাড়া সরাসরি User APK ডাউনলোড করুন"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>User APK ডাউনলোড</span>
+          </button>
+          <button
+            onClick={() => downloadApkDirect('ADMIN', '1.0.0')}
+            className="px-3.5 py-2 text-xs font-bold text-white bg-purple-600 hover:bg-purple-500 rounded-lg transition-colors flex items-center gap-1.5 whitespace-nowrap shadow-sm shadow-purple-500/10 active:scale-95"
+            title="কোনো রিডাইরেক্ট ছাড়া সরাসরি Admin APK ডাউনলোড করুন"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>Admin APK ডাউনলোড</span>
+          </button>
           <button
             onClick={() => onNavigate('licenses')}
-            className="px-4 py-2 text-xs font-semibold text-slate-950 bg-cyan-400 hover:bg-cyan-300 rounded-lg transition-colors whitespace-nowrap shadow-sm shadow-cyan-500/10"
+            className="px-3.5 py-2 text-xs font-semibold text-slate-200 bg-slate-900 hover:bg-slate-800 border border-slate-700/80 rounded-lg transition-colors whitespace-nowrap"
           >
-            + নতুন লাইসেন্স কি তৈরি করুন
+            + নতুন লাইসেন্স কি
           </button>
         </div>
       </div>

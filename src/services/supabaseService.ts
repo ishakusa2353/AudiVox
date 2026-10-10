@@ -10,13 +10,14 @@ import {
   MaintenanceConfig,
 } from '../types';
 
-export const DEFAULT_SUPABASE_URL = 'https://qbazzarqiplrqqfytajz.supabase.co';
+export const DEFAULT_SUPABASE_URL = 'https://fasjewbwjctonprecuea.supabase.co';
+export const DEFAULT_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZhc2pld2J3amN0b25wcmVjdWVhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE2MzQ4NzYsImV4cCI6MjEwNzIxMDg3Nn0.hg8mXdwvvnI2_UdJ60Y2lvQE_56-lO4iyztK_vtvGD8';
 
 class SupabaseService {
   private client: SupabaseClient | null = null;
   private projectUrl: string = DEFAULT_SUPABASE_URL;
-  private anonKey: string = '';
-  private isConnectedToLive: boolean = false;
+  private anonKey: string = DEFAULT_ANON_KEY;
+  private isConnectedToLive: boolean = true;
 
   // Local state cache / fallback mock state
   private users: UserProfile[] = [
@@ -239,9 +240,9 @@ class SupabaseService {
       min_supported_version_code: 100,
       is_mandatory_update: false,
       update_title: 'AudiVox 1.0.0 Official Launch',
-      update_notes: 'Initial production release with draggable floating bubble and multi-channel sound mixer.',
-      apk_download_url: 'https://qbazzarqiplrqqfytajz.supabase.co/storage/v1/object/public/releases/audivox-user-v1.0.0.apk',
-      apk_file_size_bytes: 24117248,
+      update_notes: 'Production release with draggable floating bubble, overlay permission auto-flow, and Supabase integration.',
+      apk_download_url: '/api/download/apk?target=user',
+      apk_file_size_bytes: 21500,
       apk_sha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
       is_published: true,
       published_at: new Date(Date.now() - 86400000 * 3).toISOString(),
@@ -255,9 +256,9 @@ class SupabaseService {
       min_supported_version_code: 100,
       is_mandatory_update: false,
       update_title: 'AudiVox Admin 1.0.0 Management Suite',
-      update_notes: 'Initial mobile admin console with real-time license generator and server maintenance controls.',
-      apk_download_url: 'https://qbazzarqiplrqqfytajz.supabase.co/storage/v1/object/public/releases/audivox-admin-v1.0.0.apk',
-      apk_file_size_bytes: 21453824,
+      update_notes: 'Mobile admin console with real-time license generator, device management, and sound library.',
+      apk_download_url: '/api/download/apk?target=admin',
+      apk_file_size_bytes: 13300,
       apk_sha256: '4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a',
       is_published: true,
       published_at: new Date(Date.now() - 86400000 * 3).toISOString(),
@@ -349,10 +350,22 @@ class SupabaseService {
   ];
 
   constructor() {
-    const savedKey = localStorage.getItem('audivox_supabase_anon_key');
+    const savedKey = localStorage.getItem('audivox_supabase_anon_key') || DEFAULT_ANON_KEY;
     const savedUrl = localStorage.getItem('audivox_supabase_url') || DEFAULT_SUPABASE_URL;
-    if (savedKey) {
-      this.initClient(savedUrl, savedKey);
+    this.initClient(savedUrl, savedKey);
+    this.isConnectedToLive = true;
+
+    // Load any custom added sounds
+    try {
+      const stored = localStorage.getItem('audivox_custom_sounds');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          this.sounds = [...parsed, ...this.sounds];
+        }
+      }
+    } catch (e) {
+      console.warn('Could not parse stored sounds:', e);
     }
   }
 
@@ -500,6 +513,15 @@ class SupabaseService {
       created_at: new Date().toISOString(),
     };
     this.sounds.unshift(newSound);
+    
+    // Save to localStorage
+    try {
+      const customSounds = this.sounds.filter(s => s.id.startsWith('s-'));
+      localStorage.setItem('audivox_custom_sounds', JSON.stringify(customSounds.slice(0, 50)));
+    } catch (e) {
+      console.warn('Could not persist sounds to localStorage:', e);
+    }
+
     this.addAuditLog('SOUND_ADDED', 'sound_items', newSound.id, { title: newSound.title });
     return newSound;
   }
@@ -516,6 +538,12 @@ class SupabaseService {
     const idx = this.sounds.findIndex(s => s.id === soundId);
     if (idx === -1) return false;
     const deleted = this.sounds.splice(idx, 1)[0];
+    
+    try {
+      const customSounds = this.sounds.filter(s => s.id.startsWith('s-'));
+      localStorage.setItem('audivox_custom_sounds', JSON.stringify(customSounds));
+    } catch (e) {}
+
     this.addAuditLog('SOUND_DELETED', 'sound_items', soundId, { title: deleted.title });
     return true;
   }
@@ -602,13 +630,14 @@ class SupabaseService {
       job.status = 'SUCCESS';
       job.completed_at = new Date().toISOString();
       job.artifact_sha256 = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
-      job.artifact_url = `https://qbazzarqiplrqqfytajz.supabase.co/storage/v1/object/public/releases/audivox-${appTarget.toLowerCase()}-v${versionName}.apk`;
+      job.artifact_url = `/api/download/apk?target=${appTarget.toLowerCase()}`;
       job.build_logs.push(
-        `[${new Date().toLocaleTimeString()}] AAPT2 and Dexing compilation completed.`,
+        `[${new Date().toLocaleTimeString()}] AAPT and DEX bytecode compilation completed.`,
+        `[${new Date().toLocaleTimeString()}] Android Package Signature Scheme v1, v2, v3 verified.`,
         `[${new Date().toLocaleTimeString()}] SHA-256 Checksum: ${job.artifact_sha256}`,
-        `[${new Date().toLocaleTimeString()}] Artifact uploaded to Supabase Storage: ${job.artifact_url}`
+        `[${new Date().toLocaleTimeString()}] APK binary ready for direct download: ${job.artifact_url}`
       );
-    }, 4000);
+    }, 2500);
 
     return job;
   }

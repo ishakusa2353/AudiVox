@@ -231,6 +231,55 @@ export default function App() {
         onClose={() => setIsConfigOpen(false)}
         onConnectionChange={(conn) => setIsLiveConnected(conn)}
       />
+
+      {/* Mobile Phone Bottom Navigation Bar (Glassmorphic, Android style) */}
+      <nav className="lg:hidden sticky bottom-0 z-40 bg-slate-950/85 backdrop-blur-xl border-t border-slate-800/80 px-2 py-2 flex items-center justify-around shadow-2xl">
+        <button
+          onClick={() => setActiveSection('dashboard')}
+          className={`flex flex-col items-center gap-1 py-1 px-2 rounded-lg text-[10px] font-medium transition-colors ${
+            activeSection === 'dashboard' ? 'text-cyan-400' : 'text-slate-400'
+          }`}
+        >
+          <span className="text-base">📊</span>
+          <span>ড্যাশবোর্ড</span>
+        </button>
+        <button
+          onClick={() => setActiveSection('licenses')}
+          className={`flex flex-col items-center gap-1 py-1 px-2 rounded-lg text-[10px] font-medium transition-colors ${
+            activeSection === 'licenses' ? 'text-cyan-400' : 'text-slate-400'
+          }`}
+        >
+          <span className="text-base">🔑</span>
+          <span>লাইসেন্স</span>
+        </button>
+        <button
+          onClick={() => setActiveSection('users')}
+          className={`flex flex-col items-center gap-1 py-1 px-2 rounded-lg text-[10px] font-medium transition-colors ${
+            activeSection === 'users' ? 'text-cyan-400' : 'text-slate-400'
+          }`}
+        >
+          <span className="text-base">👥</span>
+          <span>ইউজার</span>
+        </button>
+        <button
+          onClick={() => setActiveSection('releases')}
+          className={`flex flex-col items-center gap-1 py-1 px-2 rounded-lg text-[10px] font-medium transition-colors ${
+            activeSection === 'releases' ? 'text-cyan-400' : 'text-slate-400'
+          }`}
+        >
+          <span className="text-base">📦</span>
+          <span>APK রিলিজ</span>
+        </button>
+        <button
+          onClick={() => setActiveSection('sounds')}
+          className={`flex flex-col items-center gap-1 py-1 px-2 rounded-lg text-[10px] font-medium transition-colors ${
+            activeSection === 'sounds' ? 'text-cyan-400' : 'text-slate-400'
+          }`}
+        >
+          <span className="text-base">🎵</span>
+          <span>সাউন্ড</span>
+        </button>
+      </nav>
     </div>
   );
 }

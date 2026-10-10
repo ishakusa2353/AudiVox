@@ -41,24 +41,37 @@ class FloatingBubbleService : Service() {
         audioManager = AudioPlaybackManager(this)
         windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
 
-        startForeground(NOTIFICATION_ID, createForegroundNotification())
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val serviceType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+            } else {
+                0
+            }
+            if (serviceType != 0) {
+                startForeground(NOTIFICATION_ID, createForegroundNotification(), serviceType)
+            } else {
+                startForeground(NOTIFICATION_ID, createForegroundNotification())
+            }
+        } else {
+            startForeground(NOTIFICATION_ID, createForegroundNotification())
+        }
         createFloatingBubble()
     }
 
     private fun createForegroundNotification(): Notification {
         val launchIntent = Intent(this, MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(
-            this, 0, launchIntent,
+        val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-        )
+        } else {
+            PendingIntent.FLAG_UPDATE_CURRENT
+        }
+        val pendingIntent = PendingIntent.getActivity(this, 0, launchIntent, flags)
 
         val stopIntent = Intent(this, FloatingBubbleService::class.java).apply {
             action = ACTION_STOP_SERVICE
         }
-        val stopPendingIntent = PendingIntent.getService(
-            this, 1, stopIntent,
-            PendingIntent.FLAG_IMMUTABLE
-        )
+        val stopFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0
+        val stopPendingIntent = PendingIntent.getService(this, 1, stopIntent, stopFlags)
 
         return NotificationCompat.Builder(this, AudiVoxApplication.CHANNEL_ID)
             .setContentTitle("AudiVox Sound Bubble Active")

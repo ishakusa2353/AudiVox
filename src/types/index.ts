@@ -65,6 +65,8 @@ export interface SoundItem {
   title: string;
   description?: string;
   audio_url: string;
+  cover_image_url?: string;
+  source_type?: 'AUDIO' | 'VIDEO_EXTRACTED';
   duration_ms: number;
   file_format: string;
   file_size_bytes: number;

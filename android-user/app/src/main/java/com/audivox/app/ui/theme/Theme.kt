@@ -28,6 +28,13 @@ private val DarkColorScheme = darkColorScheme(
     error = CrimsonError
 )
 
+val GlassBackground = Color(0xF00B0F19)
+val GlassSurface = Color(0x99111827) // 60% opacity dark frosted surface
+val GlassSurfaceElevated = Color(0xB31F2937) // 70% opacity elevated frost
+val GlassBorder = Color(0x2E00F5FF) // subtle cyan glass hairline border
+val GlassBorderPurple = Color(0x2E8B5CF6) // subtle purple glass hairline border
+val GlassBorderWhite = Color(0x1AFFFFFF) // specular reflection edge
+
 @Composable
 fun AudiVoxTheme(
     darkTheme: Boolean = true,

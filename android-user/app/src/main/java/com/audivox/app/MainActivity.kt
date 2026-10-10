@@ -70,6 +70,23 @@ fun MainAppContainer(
     val coroutineScope = rememberCoroutineScope()
     var mandatoryUpdatePolicy by remember { mutableStateOf<AppPolicyResponse?>(null) }
 
+    val context = androidx.compose.ui.platform.LocalContext.current
+    var hasAllPermissions by remember {
+        mutableStateOf(
+            (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.M || android.provider.Settings.canDrawOverlays(context)) &&
+            (androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.RECORD_AUDIO) == android.content.pm.PackageManager.PERMISSION_GRANTED)
+        )
+    }
+
+    if (!hasAllPermissions) {
+        MandatoryPermissionScreen(
+            onAllPermissionsGranted = {
+                hasAllPermissions = true
+            }
+        )
+        return
+    }
+
     val startDestination = if (supabaseClient.authToken != null) {
         Screen.Home.route
     } else {

@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId = "com.audivox.admin"
-        minSdk = 26
+        minSdk = 21 // Android 5.0 (Lollipop) to Android 15/16/17 (API 35+)
         targetSdk = 35
         versionCode = 100
         versionName = "1.0.0"
@@ -19,8 +19,8 @@ android {
             useSupportLibrary = true
         }
 
-        buildConfigField("String", "SUPABASE_URL", "\"https://qbazzarqiplrqqfytajz.supabase.co\"")
-        buildConfigField("String", "SUPABASE_ANON_KEY", "\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.placeholder\"")
+        buildConfigField("String", "SUPABASE_URL", "\"https://fasjewbwjctonprecuea.supabase.co\"")
+        buildConfigField("String", "SUPABASE_ANON_KEY", "\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZhc2pld2J3amN0b25wcmVjdWVhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE2MzQ4NzYsImV4cCI6MjEwNzIxMDg3Nn0.hg8mXdwvvnI2_UdJ60Y2lvQE_56-lO4iyztK_vtvGD8\"")
     }
 
     buildTypes {

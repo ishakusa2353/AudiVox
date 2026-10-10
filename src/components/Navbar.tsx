@@ -1,5 +1,6 @@
 import React from 'react';
-import { Database, Shield, Smartphone } from 'lucide-react';
+import { Database, Shield, Smartphone, Download } from 'lucide-react';
+import { downloadApkDirect } from '../utils/apkDownloader';
 
 interface NavbarProps {
   isLiveConnected: boolean;
@@ -69,14 +70,34 @@ export const Navbar: React.FC<NavbarProps> = ({
         </button>
       </nav>
 
-      {/* Zone 3: 1 primary action button */}
-      <div className="flex items-center gap-3 shrink-0">
+      {/* Zone 3: 1 primary action button + Direct Download triggers */}
+      <div className="flex items-center gap-2.5 shrink-0">
+        <button
+          onClick={() => downloadApkDirect('USER', '1.0.0')}
+          className="px-3 py-1.5 text-xs font-bold text-slate-950 bg-cyan-400 hover:bg-cyan-300 rounded-lg transition-transform active:scale-95 flex items-center gap-1.5 whitespace-nowrap shrink-0 shadow-sm"
+          title="User APK সরাসরি ডাউনলোড করুন"
+        >
+          <Download className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline">User APK</span>
+          <span className="sm:hidden">User</span>
+        </button>
+
+        <button
+          onClick={() => downloadApkDirect('ADMIN', '1.0.0')}
+          className="px-3 py-1.5 text-xs font-bold text-white bg-purple-600 hover:bg-purple-500 rounded-lg transition-transform active:scale-95 flex items-center gap-1.5 whitespace-nowrap shrink-0 shadow-sm"
+          title="Admin APK সরাসরি ডাউনলোড করুন"
+        >
+          <Download className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline">Admin APK</span>
+          <span className="sm:hidden">Admin</span>
+        </button>
+
         <button
           onClick={onOpenConfig}
-          className="px-3.5 py-1.5 text-xs font-medium rounded-lg bg-slate-900 border border-slate-700/80 hover:border-cyan-500/50 hover:bg-slate-800 text-slate-200 transition-all flex items-center gap-2 whitespace-nowrap shrink-0"
+          className="px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-900 border border-slate-700/80 hover:border-cyan-500/50 hover:bg-slate-800 text-slate-200 transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0"
         >
           <Database className={`w-3.5 h-3.5 ${isLiveConnected ? 'text-emerald-400' : 'text-cyan-400'}`} />
-          <span>{isLiveConnected ? 'Supabase Live' : 'Supabase Config'}</span>
+          <span className="hidden md:inline">{isLiveConnected ? 'Supabase Live' : 'Supabase Config'}</span>
         </button>
       </div>
     </header>

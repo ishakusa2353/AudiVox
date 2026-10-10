@@ -1,0 +1,6 @@
+{
+  "name": "AudiVox Admin & Release Center",
+  "description": "Enterprise Admin Website, Release Center, Supabase backend, and Android source suite for AudiVox — Your Sound. Your Game.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

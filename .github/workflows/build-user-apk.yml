@@ -1,0 +1,96 @@
+name: Build AudiVox User APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build Type (release or debug)'
+        required: true
+        default: 'release'
+        type: choice
+        options:
+          - release
+          - debug
+      version_name:
+        description: 'Version Name (e.g. 1.0.0)'
+        required: true
+        default: '1.0.0'
+      version_code:
+        description: 'Version Code (e.g. 100)'
+        required: true
+        default: '100'
+
+jobs:
+  build:
+    name: Build Native Android User APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Grant Execute Permission for Gradlew
+        run: |
+          cd android-user
+          if [ -f gradlew ]; then chmod +x gradlew; fi
+
+      - name: Build Debug APK
+        if: ${{ inputs.build_type == 'debug' }}
+        run: |
+          cd android-user
+          ./gradlew assembleDebug --stacktrace
+
+      - name: Build Release APK
+        if: ${{ inputs.build_type == 'release' }}
+        env:
+          SIGNING_KEYSTORE_BASE64: ${{ secrets.ANDROID_SIGNING_KEYSTORE_BASE64 }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          cd android-user
+          if [ -n "$SIGNING_KEYSTORE_BASE64" ]; then
+            echo "$SIGNING_KEYSTORE_BASE64" | base64 --decode > app/keystore.jks
+          fi
+          ./gradlew assembleRelease --stacktrace
+
+      - name: Compute Cryptographic Checksums (SHA-256)
+        id: checksum
+        run: |
+          cd android-user
+          APK_PATH=$(find app/build/outputs/apk -name "*.apk" | head -n 1)
+          if [ -f "$APK_PATH" ]; then
+            SHA256=$(sha256sum "$APK_PATH" | awk '{print $1}')
+            FILE_SIZE=$(stat -c%s "$APK_PATH")
+            echo "apk_path=$APK_PATH" >> $GITHUB_OUTPUT
+            echo "sha256=$SHA256" >> $GITHUB_OUTPUT
+            echo "file_size=$FILE_SIZE" >> $GITHUB_OUTPUT
+            echo "Verified Checksum: $SHA256"
+            echo "File Size: $FILE_SIZE bytes"
+          else
+            echo "No APK generated"
+          fi
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: audivox-user-v${{ inputs.version_name }}-${{ inputs.build_type }}.apk
+          path: android-user/app/build/outputs/apk/**/*.apk
+          retention-days: 14
+
+      - name: Notify Release Center
+        if: ${{ success() && env.SUPABASE_RELEASE_WEBHOOK != '' }}
+        env:
+          SUPABASE_RELEASE_WEBHOOK: ${{ secrets.SUPABASE_RELEASE_WEBHOOK }}
+          SHA256: ${{ steps.checksum.outputs.sha256 }}
+        run: |
+          curl -X POST "$SUPABASE_RELEASE_WEBHOOK" \
+            -H "Content-Type: application/json" \
+            -d "{\"appTarget\":\"USER\",\"versionName\":\"${{ inputs.version_name }}\",\"versionCode\":${{ inputs.version_code }},\"sha256\":\"$SHA256\",\"status\":\"SUCCESS\"}"

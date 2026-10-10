@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">AudiVox</string>
+    <string name="tagline">Your Sound. Your Game.</string>
+    <string name="floating_service_channel_name">AudiVox Sound Bubble</string>
+    <string name="floating_service_channel_desc">Active overlay bubble for in-game sound triggers</string>
+    <string name="btn_update_later">পরে করবো</string>
+    <string name="btn_update_now">আপডেট করুন</string>
+    <string name="update_mandatory_title">বাধ্যতামূলক আপডেট প্রয়োজন</string>
+    <string name="update_mandatory_desc">নিরাপত্তা ও নতুন ফিচারের জন্য AudiVox এর সর্বশেষ সংস্করণ ইনস্টল করতে হবে।</string>
+</resources>

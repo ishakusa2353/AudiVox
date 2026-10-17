@@ -21,9 +21,8 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSelectSection }) => {
   const topAppModes = [
-    { id: 'showcase', label: '৩০-স্ক্রিন মাস্টার শোকেস', sublabel: '30-Screen UI/UX Showcase', icon: Sparkles, color: 'text-cyan-400' },
-    { id: 'user_app_sim', label: 'User Android App (ফোন)', sublabel: 'Native Phone Simulator (1–10, 19–26)', icon: Smartphone, color: 'text-cyan-400' },
-    { id: 'admin_app_sim', label: 'Admin Android App (ফোন)', sublabel: 'Admin Mobile APK (11–18)', icon: Shield, color: 'text-purple-400' },
+    { id: 'user_app_sim', label: '📱 AudiVox User App (ফোন)', sublabel: 'নেটিভ অ্যান্ড্রয়েড অ্যাপ ও ১৮টি স্ক্রিন', icon: Smartphone, color: 'text-cyan-400' },
+    { id: 'admin_app_sim', label: '🛡️ AudiVox Admin App (ফোন)', sublabel: 'নেটিভ অ্যাডমিন কনসোল ও ৮টি স্ক্রিন', icon: Shield, color: 'text-purple-400' },
   ];
 
   const navItems = [
@@ -44,7 +43,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSelectSection
         {/* Interactive App Modes */}
         <div className="space-y-1">
           <div className="px-3 py-1 text-[11px] font-semibold text-cyan-400 uppercase tracking-wider font-mono">
-            মোবাইল অ্যাপ ও শোকেস
+            মোবাইল অ্যাপ্লিকেশন
           </div>
           {topAppModes.map((item) => {
             const Icon = item.icon;

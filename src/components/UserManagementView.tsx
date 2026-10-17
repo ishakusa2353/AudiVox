@@ -78,8 +78,8 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60 text-slate-300">
-              {filteredUsers.map((user) => (
-                <tr key={user.id} className="hover:bg-slate-800/40 transition-colors">
+              {filteredUsers.map((user, idx) => (
+                <tr key={`${user.id || 'usr'}-${idx}`} className="hover:bg-slate-800/40 transition-colors">
                   <td className="py-3 px-4 font-mono font-semibold text-cyan-400">
                     {user.profile_id}
                   </td>

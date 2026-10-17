@@ -86,8 +86,8 @@ export const AuditLogsView: React.FC<AuditLogsViewProps> = ({ logs }) => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60 text-slate-300">
-              {filteredLogs.map((log) => (
-                <tr key={log.id} className="hover:bg-slate-800/40 transition-colors">
+              {filteredLogs.map((log, idx) => (
+                <tr key={`${log.id || 'log'}-${idx}`} className="hover:bg-slate-800/40 transition-colors">
                   <td className="py-3 px-4 text-slate-400 tabular-nums">
                     {new Date(log.created_at).toLocaleString()}
                   </td>

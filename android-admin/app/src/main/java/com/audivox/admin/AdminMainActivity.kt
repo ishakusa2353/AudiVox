@@ -38,7 +38,7 @@ class AdminMainActivity : ComponentActivity() {
 }
 
 enum class AdminRoute {
-    LOGIN, DASHBOARD, LICENSES, MAINTENANCE
+    LOGIN, DASHBOARD, USERS, LICENSES, SOUNDS, DEVICES, BUILD, RELEASES, MAINTENANCE
 }
 
 @Composable
@@ -57,16 +57,52 @@ fun AdminAppRoot(adminRepo: AdminRepository) {
         AdminRoute.DASHBOARD -> {
             AdminDashboardScreen(
                 adminRepo = adminRepo,
+                onNavigateToUsers = { currentRoute = AdminRoute.USERS },
                 onNavigateToLicenses = { currentRoute = AdminRoute.LICENSES },
+                onNavigateToSounds = { currentRoute = AdminRoute.SOUNDS },
+                onNavigateToDevices = { currentRoute = AdminRoute.DEVICES },
+                onNavigateToBuild = { currentRoute = AdminRoute.BUILD },
+                onNavigateToReleases = { currentRoute = AdminRoute.RELEASES },
                 onNavigateToMaintenance = { currentRoute = AdminRoute.MAINTENANCE },
+                onNavigateToAuditLogs = { /* Audit log view */ },
                 onLogout = {
                     adminRepo.logout()
                     currentRoute = AdminRoute.LOGIN
                 }
             )
         }
+        AdminRoute.USERS -> {
+            AdminUserManagementScreen(
+                adminRepo = adminRepo,
+                onBack = { currentRoute = AdminRoute.DASHBOARD }
+            )
+        }
         AdminRoute.LICENSES -> {
             AdminLicenseGeneratorScreen(
+                adminRepo = adminRepo,
+                onBack = { currentRoute = AdminRoute.DASHBOARD }
+            )
+        }
+        AdminRoute.SOUNDS -> {
+            AdminSoundManagementScreen(
+                adminRepo = adminRepo,
+                onBack = { currentRoute = AdminRoute.DASHBOARD }
+            )
+        }
+        AdminRoute.DEVICES -> {
+            AdminDeviceFleetScreen(
+                adminRepo = adminRepo,
+                onBack = { currentRoute = AdminRoute.DASHBOARD }
+            )
+        }
+        AdminRoute.BUILD -> {
+            AdminBuildCenterScreen(
+                adminRepo = adminRepo,
+                onBack = { currentRoute = AdminRoute.DASHBOARD }
+            )
+        }
+        AdminRoute.RELEASES -> {
+            AdminReleaseCenterScreen(
                 adminRepo = adminRepo,
                 onBack = { currentRoute = AdminRoute.DASHBOARD }
             )

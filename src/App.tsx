@@ -28,7 +28,7 @@ import {
 } from './types';
 
 export default function App() {
-  const [activeSection, setActiveSection] = useState('showcase');
+  const [activeSection, setActiveSection] = useState('dashboard');
   const [isConfigOpen, setIsConfigOpen] = useState(false);
   const [isLiveConnected, setIsLiveConnected] = useState(supabaseService.isLiveConnected());
   const [userSimScreen, setUserSimScreen] = useState<UserAppScreen>('home');
@@ -271,13 +271,13 @@ export default function App() {
       {/* Mobile Phone Bottom Navigation Bar (Glassmorphic, Android style) */}
       <nav className="lg:hidden sticky bottom-0 z-40 bg-slate-950/85 backdrop-blur-xl border-t border-slate-800/80 px-2 py-2 flex items-center justify-around shadow-2xl">
         <button
-          onClick={() => setActiveSection('showcase')}
+          onClick={() => setActiveSection('dashboard')}
           className={`flex flex-col items-center gap-1 py-1 px-2 rounded-lg text-[10px] font-medium transition-colors ${
-            activeSection === 'showcase' ? 'text-cyan-400 font-bold' : 'text-slate-400'
+            activeSection === 'dashboard' ? 'text-cyan-400 font-bold' : 'text-slate-400'
           }`}
         >
-          <span className="text-base">🖼️</span>
-          <span>শোকেস</span>
+          <span className="text-base">📊</span>
+          <span>ওয়েবসাইট</span>
         </button>
         <button
           onClick={() => setActiveSection('user_app_sim')}

@@ -267,8 +267,8 @@ export const BuildReleaseCenterView: React.FC<BuildReleaseCenterViewProps> = ({
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60 text-slate-300">
-                {releases.map((rel) => (
-                  <tr key={rel.id} className="hover:bg-slate-800/40 transition-colors">
+                {releases.map((rel, idx) => (
+                  <tr key={`${rel.id || 'rel'}-${idx}`} className="hover:bg-slate-800/40 transition-colors">
                     <td className="py-3 px-4 font-semibold text-white">
                       AudiVox {rel.app_target}
                     </td>

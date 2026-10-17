@@ -111,7 +111,7 @@ export const LicenseManagementView: React.FC<LicenseManagementViewProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60 text-slate-300">
-              {licenses.map((lic) => {
+              {licenses.map((lic, idx) => {
                 const totalSec = lic.duration_seconds;
                 const d = Math.floor(totalSec / 86400);
                 const h = Math.floor((totalSec % 86400) / 3600);
@@ -119,7 +119,7 @@ export const LicenseManagementView: React.FC<LicenseManagementViewProps> = ({
                 const s = totalSec % 60;
 
                 return (
-                  <tr key={lic.id} className="hover:bg-slate-800/40 transition-colors">
+                  <tr key={`${lic.id || 'lic'}-${idx}`} className="hover:bg-slate-800/40 transition-colors">
                     <td className="py-3 px-4 font-mono font-medium text-cyan-300 select-all">
                       {lic.license_key}
                     </td>

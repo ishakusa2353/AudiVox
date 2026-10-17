@@ -142,6 +142,8 @@ fun AdminDashboardScreen(
     onNavigateToLicenses: () -> Unit,
     onNavigateToSounds: () -> Unit,
     onNavigateToDevices: () -> Unit,
+    onNavigateToBuild: () -> Unit,
+    onNavigateToReleases: () -> Unit,
     onNavigateToMaintenance: () -> Unit,
     onNavigateToAuditLogs: () -> Unit,
     onLogout: () -> Unit
@@ -246,6 +248,24 @@ fun AdminDashboardScreen(
         Spacer(modifier = Modifier.height(10.dp))
 
         AdminActionCard(
+            title = "APK বিল্ড সেন্টার (Build Center)",
+            subtitle = "ইউজার ও অ্যাডমিন অ্যাপ সোর্স কম্পাইলেশন ও ৬৫% প্রগ্রেস ট্র্যাকার",
+            icon = Icons.Default.PlayArrow,
+            onClick = onNavigateToBuild
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        AdminActionCard(
+            title = "রিলিজ ও ডাউনলোড সেন্টার (Release Center)",
+            subtitle = "v1.2.0 প্রোডাকশন রিলিজ, SHA-256 চেকার ও APK প্যাকেজ ডিস্ট্রিবিউশন",
+            icon = Icons.Default.Download,
+            onClick = onNavigateToReleases
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        AdminActionCard(
             title = "রক্ষণাবেক্ষণ মোড (Maintenance Control)",
             subtitle = "সার্ভার মেইন্টেন্যান্স ও জরুরি বার্তা সম্প্রচার",
             icon = Icons.Default.Build,
@@ -301,3 +321,277 @@ fun AdminActionCard(title: String, subtitle: String, icon: androidx.compose.ui.g
         }
     }
 }
+
+@Composable
+fun AdminUserManagementScreen(adminRepo: AdminRepository, onBack: () -> Unit) {
+    var searchQuery by remember { mutableStateOf("") }
+    val scrollState = rememberScrollState()
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(DarkBackground)
+            .padding(16.dp)
+            .verticalScroll(scrollState)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = onBack) {
+                Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
+            }
+            Text("ব্যবহারকারী ব্যবস্থাপনা (Users)", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = { searchQuery = it },
+            label = { Text("৮-ডিজিট আইডি বা ফোন দিয়ে খুঁজুন") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        listOf(
+            Triple("তানভীর আহমেদ", "ID: 84573219", "সক্রিয় (ACTIVE)"),
+            Triple("আসিফ মাহমুদ", "ID: 49201847", "সক্রিয় (ACTIVE)"),
+            Triple("সাকিব আল হাসান", "ID: 71048293", "স্থগিত (SUSPENDED)")
+        ).forEach { (name, id, status) ->
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                colors = CardDefaults.cardColors(containerColor = DarkSurface),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(14.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(name, fontWeight = FontWeight.Bold, color = Color.White, fontSize = 14.sp)
+                        Text(id, color = Color.Gray, fontSize = 11.sp)
+                    }
+                    Text(
+                        status,
+                        color = if (status.contains("ACTIVE")) Color(0xFF10B981) else Color(0xFFEF4444),
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun AdminSoundManagementScreen(adminRepo: AdminRepository, onBack: () -> Unit) {
+    val scrollState = rememberScrollState()
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(DarkBackground)
+            .padding(16.dp)
+            .verticalScroll(scrollState)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = onBack) {
+                Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
+            }
+            Text("সাউন্ডবোর্ড কন্ট্রোল (Sounds)", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        listOf(
+            "Headshot Strike" to "Gaming FX",
+            "Victory Fanfare" to "Gaming FX",
+            "Squad Rush Callout" to "Voice Lines",
+            "Sad Trombone" to "Memes"
+        ).forEach { (title, cat) ->
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                colors = CardDefaults.cardColors(containerColor = DarkSurface),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(14.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(title, fontWeight = FontWeight.Bold, color = Color.White, fontSize = 13.sp)
+                        Text(cat, color = CyanAccent, fontSize = 11.sp)
+                    }
+                    Text("Published", color = Color(0xFF10B981), fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun AdminDeviceFleetScreen(adminRepo: AdminRepository, onBack: () -> Unit) {
+    val scrollState = rememberScrollState()
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(DarkBackground)
+            .padding(16.dp)
+            .verticalScroll(scrollState)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = onBack) {
+                Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
+            }
+            Text("ডিভাইস ফ্লিট (Device Fleet)", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        listOf(
+            "Samsung Galaxy S24 Ultra" to "FP: a8f9...4c21",
+            "Xiaomi 14 Pro" to "FP: b3d1...8e09",
+            "OnePlus 12" to "FP: c9e2...1f74"
+        ).forEach { (model, fp) ->
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                colors = CardDefaults.cardColors(containerColor = DarkSurface),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(14.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(model, fontWeight = FontWeight.Bold, color = Color.White, fontSize = 13.sp)
+                        Text(fp, color = Color.Gray, fontSize = 11.sp)
+                    }
+                    Text("ACTIVE", color = Color(0xFF10B981), fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun AdminBuildCenterScreen(adminRepo: AdminRepository, onBack: () -> Unit) {
+    var isBuilding by remember { mutableStateOf(false) }
+    var buildTarget by remember { mutableStateOf("USER_APP") }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(DarkBackground)
+            .padding(16.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = onBack) {
+                Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
+            }
+            Text("APK বিল্ড সেন্টার (Build Center)", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = DarkSurface),
+            shape = RoundedCornerShape(14.dp)
+        ) {
+            Column(modifier = Modifier.padding(18.dp)) {
+                Text("টার্গেট অ্যান্ড্রয়েড অ্যাপ্লিকেশন নির্বাচন", fontWeight = FontWeight.SemiBold, color = Color.White, fontSize = 13.sp)
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FilterChip(
+                        selected = buildTarget == "USER_APP",
+                        onClick = { buildTarget = "USER_APP" },
+                        label = { Text("User App APK") }
+                    )
+                    FilterChip(
+                        selected = buildTarget == "ADMIN_APP",
+                        onClick = { buildTarget = "ADMIN_APP" },
+                        label = { Text("Admin App APK") }
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                LinearProgressIndicator(
+                    progress = if (isBuilding) 0.65f else 1.0f,
+                    modifier = Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(4.dp)),
+                    color = CyanAccent,
+                    trackColor = Color(0xFF1F2937)
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+                Text(
+                    text = if (isBuilding) "কম্পাইলিং ও সাইনিং চলছে (৬৫%)..." else "বিল্ড রেডি: v1.0.0 (Code 100)",
+                    fontSize = 12.sp,
+                    color = CyanAccent
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Button(
+                    onClick = { isBuilding = !isBuilding },
+                    modifier = Modifier.fillMaxWidth().height(48.dp),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = CyanAccent)
+                ) {
+                    Text(if (isBuilding) "বিল্ড বাতিল করুন" else "নতুন APK বিল্ড শুরু করুন", color = Color.Black, fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun AdminReleaseCenterScreen(adminRepo: AdminRepository, onBack: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(DarkBackground)
+            .padding(16.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = onBack) {
+                Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
+            }
+            Text("রিলিজ ও ডাউনলোড সেন্টার (Releases)", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        listOf(
+            "AudiVox User App" to "v1.0.0 (Code 100) · 28.5 KB",
+            "AudiVox Admin App" to "v1.0.0 (Code 100) · 20.5 KB"
+        ).forEach { (name, meta) ->
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 6.dp),
+                colors = CardDefaults.cardColors(containerColor = DarkSurface),
+                shape = RoundedCornerShape(14.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(name, fontWeight = FontWeight.Bold, color = Color.White, fontSize = 14.sp)
+                    Text(meta, color = Color.Gray, fontSize = 11.sp)
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Text("SHA-256: 7e2b81fa4d...verified", color = CyanAccent, fontSize = 10.sp)
+                }
+            }
+        }
+    }
+}
+

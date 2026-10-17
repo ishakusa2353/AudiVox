@@ -317,11 +317,11 @@ export const SoundLibraryView: React.FC<SoundLibraryViewProps> = ({
 
       {/* Sounds Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredSounds.map((sound) => {
+        {filteredSounds.map((sound, index) => {
           const isPlaying = playingSoundId === sound.id;
           return (
             <div
-              key={sound.id}
+              key={`${sound.id || 'snd'}-${index}`}
               className={`p-4 rounded-2xl border transition-all relative overflow-hidden backdrop-blur-xl ${
                 isPlaying
                   ? 'bg-slate-900/90 border-cyan-500/50 shadow-xl shadow-cyan-500/10'

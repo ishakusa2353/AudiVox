@@ -298,8 +298,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/60 text-slate-300">
-                  {licenses.slice(0, 5).map((lic) => (
-                    <tr key={lic.id} className="hover:bg-slate-800/40 transition-colors">
+                  {licenses.slice(0, 5).map((lic, idx) => (
+                    <tr key={`${lic.id || 'lic'}-${idx}`} className="hover:bg-slate-800/40 transition-colors">
                       <td className="py-3 px-4 font-mono font-medium text-cyan-300">
                         {lic.license_key}
                       </td>
@@ -351,8 +351,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
 
           <div className="rounded-xl border border-slate-800/80 bg-slate-900/60 p-4 space-y-3">
-            {auditLogs.slice(0, 5).map((log) => (
-              <div key={log.id} className="pb-3 border-b border-slate-800/50 last:border-0 last:pb-0">
+            {auditLogs.slice(0, 5).map((log, idx) => (
+              <div key={`${log.id || 'log'}-${idx}`} className="pb-3 border-b border-slate-800/50 last:border-0 last:pb-0">
                 <div className="flex items-center justify-between text-xs">
                   <span className="font-mono text-cyan-300 font-medium">{log.action}</span>
                   <span className="text-[11px] text-slate-500 font-mono tabular-nums">

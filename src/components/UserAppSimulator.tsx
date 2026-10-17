@@ -217,8 +217,80 @@ export const UserAppSimulator: React.FC<UserAppSimulatorProps> = ({
     }
   }, [initialScreen]);
 
+  const userScreensList: { id: UserAppScreen; label: string; badge: string }[] = [
+    { id: 'splash', label: '01. Splash Screen (অ্যানিমেশন ও ব্র্যান্ডিং)', badge: 'Screen 01' },
+    { id: 'welcome', label: '02. Welcome / Intro (গেমিং হেডফোন)', badge: 'Screen 02' },
+    { id: 'register', label: '03. Registration (ইউজার রেজিস্টার)', badge: 'Screen 03' },
+    { id: 'login', label: '04. Login (ফোন ও পাসওয়ার্ড লগইন)', badge: 'Screen 04' },
+    { id: 'activation', label: '05. License Activation (লাইসেন্স কি)', badge: 'Screen 05' },
+    { id: 'home', label: '06. Home Dashboard (ফিচার্ড সাউন্ডস)', badge: 'Screen 06' },
+    { id: 'sounds', label: '07. Sound Library (সার্চ ও ফিল্টার)', badge: 'Screen 07' },
+    { id: 'favorites', label: '08. Favorites (পছন্দের সাউন্ডবোর্ড)', badge: 'Screen 08' },
+    { id: 'mixer', label: '09. Audio Mixer (ভলিউম কন্ট্রোলার)', badge: 'Screen 09' },
+    { id: 'settings', label: '10. Settings & Preferences', badge: 'Screen 10' },
+    { id: 'profile', label: '19. Profile Modal (৮-ডিজিট আইডি)', badge: 'Screen 19' },
+    { id: 'add_custom', label: '20. Add Custom Sound (কাস্টম অডিও)', badge: 'Screen 20' },
+    { id: 'floating_bubble', label: '21. Floating Sound Bubble (ওভারলে)', badge: 'Screen 21' },
+    { id: 'update_notice', label: '22. Mandatory Update Notice', badge: 'Screen 22' },
+    { id: 'download_install', label: '23. Download & Install Bar', badge: 'Screen 23' },
+    { id: 'after_update', label: '24. After Update Success', badge: 'Screen 24' },
+    { id: 'maintenance_screen', label: '25. System Maintenance', badge: 'Screen 25' },
+    { id: 'offline_screen', label: '26. Offline Screen', badge: 'Screen 26' },
+  ];
+
   return (
-    <div className="flex flex-col items-center justify-center p-2 sm:p-6 w-full max-w-md mx-auto select-none">
+    <div className="flex flex-col items-center justify-center p-2 sm:p-6 w-full max-w-2xl mx-auto select-none">
+      {/* Top Controller Header for the User App */}
+      <div className="w-full max-w-[420px] mb-4 bg-slate-900/90 border border-cyan-500/30 rounded-2xl p-3 backdrop-blur-xl shadow-lg flex flex-col gap-2.5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping" />
+            <span className="text-xs font-bold text-white uppercase tracking-wider font-mono">
+              AudiVox User App
+            </span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-mono">
+              Live Phone
+            </span>
+          </div>
+
+          <a
+            href="/downloads/audivox-user-v1.0.0.apk"
+            download="audivox-user-v1.0.0.apk"
+            className="px-2.5 py-1 rounded-lg bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold text-[11px] font-mono flex items-center gap-1 shadow-md shadow-cyan-400/20 transition-all active:scale-95"
+          >
+            <Download className="w-3 h-3" />
+            <span>Download APK</span>
+          </a>
+        </div>
+
+        {/* Screen Switcher Dropdown */}
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] text-slate-400 font-medium shrink-0">স্ক্রিন সিলেক্ট:</span>
+          <select
+            value={currentScreen}
+            onChange={(e) => {
+              const val = e.target.value as UserAppScreen;
+              if (['profile', 'add_custom', 'floating_bubble', 'update_notice', 'download_install', 'after_update', 'maintenance_screen', 'offline_screen'].includes(val)) {
+                setActiveModal(val);
+              } else {
+                setActiveModal(null);
+                setCurrentScreen(val);
+                if (['home', 'sounds', 'favorites', 'mixer', 'settings'].includes(val)) {
+                  setActiveTab(val as any);
+                }
+              }
+            }}
+            className="flex-1 bg-slate-950 border border-slate-700/80 text-cyan-300 text-xs rounded-xl px-2.5 py-1.5 font-mono focus:outline-none focus:border-cyan-400 cursor-pointer"
+          >
+            {userScreensList.map((s) => (
+              <option key={s.id} value={s.id} className="bg-slate-950 text-slate-200">
+                {s.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
       {/* Phone Case Frame */}
       <div className="w-[360px] sm:w-[380px] h-[780px] bg-slate-950 rounded-[44px] border-[5px] border-slate-800 shadow-[0_0_60px_rgba(6,182,212,0.25)] relative overflow-hidden flex flex-col ring-1 ring-cyan-500/20">
         
@@ -583,11 +655,11 @@ export const UserAppSimulator: React.FC<UserAppSimulatorProps> = ({
                   </div>
 
                   <div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-none">
-                    {sounds.filter((s) => s.featured).map((sound) => {
+                    {sounds.filter((s) => s.featured).map((sound, idx) => {
                       const isPlaying = playingSoundId === sound.id;
                       return (
                         <div
-                          key={sound.id}
+                          key={`featured-${sound.id}-${idx}`}
                           onClick={() => handlePlaySound(sound)}
                           className={`w-28 p-3 rounded-2xl border shrink-0 cursor-pointer transition-all ${
                             isPlaying
@@ -657,11 +729,11 @@ export const UserAppSimulator: React.FC<UserAppSimulatorProps> = ({
                   </div>
 
                   <div className="space-y-2">
-                    {sounds.slice(0, 3).map((sound) => {
+                    {sounds.slice(0, 3).map((sound, idx) => {
                       const isPlaying = playingSoundId === sound.id;
                       return (
                         <div
-                          key={sound.id}
+                          key={`top-${sound.id}-${idx}`}
                           onClick={() => handlePlaySound(sound)}
                           className={`p-2.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
                             isPlaying
@@ -749,17 +821,17 @@ export const UserAppSimulator: React.FC<UserAppSimulatorProps> = ({
 
                 {/* Sounds List */}
                 <div className="space-y-2 pt-1">
-                  {sounds
+                    {sounds
                     .filter(
                       (s) =>
                         (selectedCategory === 'All' || s.category === selectedCategory) &&
                         s.title.toLowerCase().includes(searchQuery.toLowerCase())
                     )
-                    .map((sound) => {
+                    .map((sound, idx) => {
                       const isPlaying = playingSoundId === sound.id;
                       return (
                         <div
-                          key={sound.id}
+                          key={`sound-lib-${sound.id}-${idx}`}
                           onClick={() => handlePlaySound(sound)}
                           className={`p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
                             isPlaying
@@ -811,11 +883,11 @@ export const UserAppSimulator: React.FC<UserAppSimulatorProps> = ({
                 </div>
 
                 <div className="space-y-2">
-                  {sounds.filter((s) => s.isFavorite).map((sound) => {
+                  {sounds.filter((s) => s.isFavorite).map((sound, idx) => {
                     const isPlaying = playingSoundId === sound.id;
                     return (
                       <div
-                        key={sound.id}
+                        key={`fav-${sound.id}-${idx}`}
                         onClick={() => handlePlaySound(sound)}
                         className={`p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
                           isPlaying
@@ -1162,9 +1234,9 @@ export const UserAppSimulator: React.FC<UserAppSimulatorProps> = ({
                     </div>
 
                     <div className="space-y-2">
-                      {sounds.slice(0, 3).map((sound) => (
+                      {sounds.slice(0, 3).map((sound, idx) => (
                         <div
-                          key={sound.id}
+                          key={`bubble-${sound.id}-${idx}`}
                           onClick={() => handlePlaySound(sound)}
                           className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between cursor-pointer hover:border-cyan-400"
                         >

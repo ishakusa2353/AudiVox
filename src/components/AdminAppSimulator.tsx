@@ -121,8 +121,61 @@ export const AdminAppSimulator: React.FC<AdminAppSimulatorProps> = ({
     setShowCreateLicense(false);
   };
 
+  const adminScreensList: { id: AdminAppScreen; label: string }[] = [
+    { id: 'login', label: '11. Admin Login (অ্যাডমিন লগইন)' },
+    { id: 'dashboard', label: '12. Admin Dashboard (সিস্টেম মেট্রিক্স)' },
+    { id: 'users', label: '13. User Management (ইউজার ও আইডি)' },
+    { id: 'licenses', label: '14. License Generator (কাস্টম মেয়াদ)' },
+    { id: 'sounds', label: '15. Soundboard Control (পাবলিশ টগল)' },
+    { id: 'maintenance', label: '16. Maintenance Mode (সার্ভার লক)' },
+    { id: 'build', label: '17. APK Build Center (৬৫% প্রগ্রেস)' },
+    { id: 'releases', label: '18. Release Center (APK ডাউনলোড)' },
+  ];
+
   return (
-    <div className="flex flex-col items-center justify-center p-2 sm:p-6 w-full max-w-md mx-auto select-none">
+    <div className="flex flex-col items-center justify-center p-2 sm:p-6 w-full max-w-2xl mx-auto select-none">
+      {/* Top Controller Header for the Admin App */}
+      <div className="w-full max-w-[420px] mb-4 bg-slate-900/90 border border-purple-500/30 rounded-2xl p-3 backdrop-blur-xl shadow-lg flex flex-col gap-2.5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-2.5 h-2.5 rounded-full bg-purple-400 animate-ping" />
+            <span className="text-xs font-bold text-white uppercase tracking-wider font-mono">
+              AudiVox Admin App
+            </span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 font-mono">
+              Native Admin
+            </span>
+          </div>
+
+          <a
+            href="/downloads/audivox-admin-v1.0.0.apk"
+            download="audivox-admin-v1.0.0.apk"
+            className="px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-bold text-[11px] font-mono flex items-center gap-1 shadow-md shadow-purple-600/20 transition-all active:scale-95"
+          >
+            <Download className="w-3 h-3" />
+            <span>Download APK</span>
+          </a>
+        </div>
+
+        {/* Screen Switcher Dropdown */}
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] text-slate-400 font-medium shrink-0">স্ক্রিন সিলেক্ট:</span>
+          <select
+            value={currentScreen}
+            onChange={(e) => {
+              setCurrentScreen(e.target.value as AdminAppScreen);
+            }}
+            className="flex-1 bg-slate-950 border border-slate-700/80 text-purple-300 text-xs rounded-xl px-2.5 py-1.5 font-mono focus:outline-none focus:border-purple-400 cursor-pointer"
+          >
+            {adminScreensList.map((s) => (
+              <option key={s.id} value={s.id} className="bg-slate-950 text-slate-200">
+                {s.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
       {/* Phone Case Frame */}
       <div className="w-[360px] sm:w-[380px] h-[780px] bg-slate-950 rounded-[44px] border-[5px] border-slate-800 shadow-[0_0_60px_rgba(168,85,247,0.25)] relative overflow-hidden flex flex-col ring-1 ring-purple-500/20">
         
@@ -364,10 +417,10 @@ export const AdminAppSimulator: React.FC<AdminAppSimulatorProps> = ({
                 <div className="space-y-2 pt-1">
                   {adminUsers
                     .filter((u) => u.name.toLowerCase().includes(searchQuery.toLowerCase()) || u.phone.includes(searchQuery))
-                    .map((user) => {
+                    .map((user, idx) => {
                       const isActive = user.status === 'ACTIVE';
                       return (
-                        <div key={user.id} className="p-3 rounded-xl bg-slate-900/70 border border-slate-800 flex items-center justify-between">
+                        <div key={`admin-user-${user.id}-${idx}`} className="p-3 rounded-xl bg-slate-900/70 border border-slate-800 flex items-center justify-between">
                           <div>
                             <div className="text-xs font-bold text-white flex items-center gap-2">
                               <span>{user.name}</span>
@@ -420,10 +473,10 @@ export const AdminAppSimulator: React.FC<AdminAppSimulatorProps> = ({
                 </div>
 
                 <div className="space-y-2 pt-1">
-                  {adminLicenses.map((lic) => {
+                  {adminLicenses.map((lic, idx) => {
                     const isActive = lic.status === 'ACTIVE';
                     return (
-                      <div key={lic.id} className="p-3 rounded-xl bg-slate-900/70 border border-slate-800 flex items-center justify-between">
+                      <div key={`admin-lic-${lic.id}-${idx}`} className="p-3 rounded-xl bg-slate-900/70 border border-slate-800 flex items-center justify-between">
                         <div>
                           <div className="text-xs font-bold font-mono text-purple-300 flex items-center gap-2">
                             <span>{lic.key}</span>
@@ -479,8 +532,8 @@ export const AdminAppSimulator: React.FC<AdminAppSimulatorProps> = ({
                 </div>
 
                 <div className="space-y-2 pt-1">
-                  {adminSounds.map((snd) => (
-                    <div key={snd.id} className="p-3 rounded-xl bg-slate-900/70 border border-slate-800 flex items-center justify-between">
+                  {adminSounds.map((snd, idx) => (
+                    <div key={`admin-snd-${snd.id}-${idx}`} className="p-3 rounded-xl bg-slate-900/70 border border-slate-800 flex items-center justify-between">
                       <div>
                         <div className="text-xs font-bold text-white">{snd.title}</div>
                         <div className="text-[10px] text-slate-400 font-mono">{snd.category}</div>

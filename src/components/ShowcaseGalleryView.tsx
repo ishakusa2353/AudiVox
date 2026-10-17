@@ -490,11 +490,11 @@ export const ShowcaseGalleryView: React.FC<ShowcaseGalleryViewProps> = ({
 
       {/* 30 Screens Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {filteredItems.map((item) => {
+        {filteredItems.map((item, idx) => {
           const Icon = item.icon;
           return (
             <motion.div
-              key={item.id}
+              key={`${item.id}-${idx}`}
               whileHover={{ y: -4 }}
               transition={{ duration: 0.2 }}
               className="p-4 rounded-2xl bg-slate-900/70 border border-slate-800/80 hover:border-cyan-500/40 hover:bg-slate-900/90 transition-all flex flex-col justify-between shadow-lg group relative overflow-hidden"

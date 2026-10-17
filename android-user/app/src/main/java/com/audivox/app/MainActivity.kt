@@ -164,6 +164,24 @@ fun MainAppContainer(
             startDestination = startDestination,
             modifier = Modifier.padding(innerPadding)
         ) {
+            composable(Screen.Splash.route) {
+                SplashScreen(
+                    onSplashFinished = {
+                        val next = if (supabaseClient.authToken != null) Screen.Home.route else Screen.Welcome.route
+                        navController.navigate(next) {
+                            popUpTo(Screen.Splash.route) { inclusive = true }
+                        }
+                    }
+                )
+            }
+
+            composable(Screen.Welcome.route) {
+                WelcomeScreen(
+                    onNavigateToLogin = { navController.navigate(Screen.Login.route) },
+                    onNavigateToRegister = { navController.navigate(Screen.Register.route) }
+                )
+            }
+
             composable(Screen.Login.route) {
                 LoginScreen(
                     supabaseClient = supabaseClient,
@@ -238,6 +256,52 @@ fun MainAppContainer(
                     supabaseClient = supabaseClient,
                     onLogout = {
                         navController.navigate(Screen.Login.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
+                )
+            }
+
+            composable(Screen.Profile.route) {
+                ProfileScreen(
+                    supabaseClient = supabaseClient,
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(Screen.AddCustomSound.route) {
+                AddCustomSoundScreen(
+                    onBack = { navController.popBackStack() },
+                    onSoundAdded = { title, cat ->
+                        // sound added callback
+                    }
+                )
+            }
+
+            composable(Screen.AfterUpdate.route) {
+                AfterUpdateSuccessScreen(
+                    onGoHome = {
+                        navController.navigate(Screen.Home.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
+                )
+            }
+
+            composable(Screen.Maintenance.route) {
+                SystemMaintenanceScreen(
+                    onRetry = {
+                        navController.navigate(Screen.Splash.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
+                )
+            }
+
+            composable(Screen.Offline.route) {
+                OfflineNetworkScreen(
+                    onRetry = {
+                        navController.navigate(Screen.Splash.route) {
                             popUpTo(0) { inclusive = true }
                         }
                     }

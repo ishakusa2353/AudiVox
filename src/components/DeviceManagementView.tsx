@@ -77,8 +77,8 @@ export const DeviceManagementView: React.FC<DeviceManagementViewProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60 text-slate-300">
-              {filteredDevices.map((dev) => (
-                <tr key={dev.id} className="hover:bg-slate-800/40 transition-colors">
+              {filteredDevices.map((dev, idx) => (
+                <tr key={`${dev.id || 'dev'}-${idx}`} className="hover:bg-slate-800/40 transition-colors">
                   <td className="py-3 px-4">
                     <div className="font-semibold text-white flex items-center gap-2">
                       <Smartphone className="w-4 h-4 text-cyan-400 shrink-0" />

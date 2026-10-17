@@ -138,11 +138,23 @@ fun AdminLoginScreen(
 @Composable
 fun AdminDashboardScreen(
     adminRepo: AdminRepository,
+    onNavigateToUsers: () -> Unit,
     onNavigateToLicenses: () -> Unit,
+    onNavigateToSounds: () -> Unit,
+    onNavigateToDevices: () -> Unit,
     onNavigateToMaintenance: () -> Unit,
+    onNavigateToAuditLogs: () -> Unit,
     onLogout: () -> Unit
 ) {
     val scrollState = rememberScrollState()
+    var stats by remember { mutableStateOf<com.google.gson.JsonObject?>(null) }
+    var isLoadingStats by remember { mutableStateOf(true) }
+
+    LaunchedEffect(Unit) {
+        val res = adminRepo.getDashboardStats()
+        res.onSuccess { stats = it }
+        isLoadingStats = false
+    }
 
     Column(
         modifier = Modifier
@@ -158,7 +170,7 @@ fun AdminDashboardScreen(
         ) {
             Column {
                 Text("AudiVox Admin Dashboard", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                Text("Enterprise System Overview", fontSize = 11.sp, color = CyanAccent)
+                Text("Real-Time Enterprise System Metrics", fontSize = 11.sp, color = CyanAccent)
             }
             IconButton(onClick = onLogout) {
                 Icon(Icons.Default.Logout, contentDescription = "Logout", tint = Color.Gray)
@@ -167,13 +179,18 @@ fun AdminDashboardScreen(
 
         Spacer(modifier = Modifier.height(18.dp))
 
-        // Quick Stats Row
+        // Dynamic Real Stats Grid
+        val totalUsers = stats?.get("total_users")?.asString ?: if (isLoadingStats) "..." else "0"
+        val activeLic = stats?.get("active_licenses")?.asString ?: if (isLoadingStats) "..." else "0"
+        val totalDevices = stats?.get("total_devices")?.asString ?: if (isLoadingStats) "..." else "0"
+        val pubSounds = stats?.get("published_sounds")?.asString ?: if (isLoadingStats) "..." else "0"
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            StatCard("সক্রিয় লাইসেন্স", "148", CyanAccent, Modifier.weight(1f))
-            StatCard("মোট ইউজার", "320", PurpleAccent, Modifier.weight(1f))
+            StatCard("সক্রিয় লাইসেন্স", activeLic, CyanAccent, Modifier.weight(1f))
+            StatCard("মোট ইউজার", totalUsers, PurpleAccent, Modifier.weight(1f))
         }
 
         Spacer(modifier = Modifier.height(10.dp))
@@ -182,15 +199,24 @@ fun AdminDashboardScreen(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            StatCard("অনলাইন ডিভাইস", "142", Color(0xFF10B981), Modifier.weight(1f))
-            StatCard("বিল্ড রিলিজ", "v1.0.0", Color(0xFFF59E0B), Modifier.weight(1f))
+            StatCard("নিবন্ধিত ডিভাইস", totalDevices, Color(0xFF10B981), Modifier.weight(1f))
+            StatCard("প্রকাশিত সাউন্ড", pubSounds, Color(0xFFF59E0B), Modifier.weight(1f))
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Text("দ্রুত ব্যবস্থাপনা মেনু", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
+        Text("অ্যাডমিন মডিউল ও ব্যবস্থাপনা", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
 
         Spacer(modifier = Modifier.height(12.dp))
+
+        AdminActionCard(
+            title = "ব্যবহারকারী ব্যবস্থাপনা (User Management)",
+            subtitle = "৮-ডিজিট আইডি, ফোন নম্বর অনুসন্ধান ও অ্যাকাউন্ট সাসপেনশন",
+            icon = Icons.Default.People,
+            onClick = onNavigateToUsers
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
 
         AdminActionCard(
             title = "লাইসেন্স জেনারেটর ও মেয়াদ নির্ধারণ",
@@ -202,10 +228,37 @@ fun AdminDashboardScreen(
         Spacer(modifier = Modifier.height(10.dp))
 
         AdminActionCard(
+            title = "সাউন্ড লাইব্রেরি ব্যবস্থাপনা",
+            subtitle = "গেমিং সাউন্ড যোগ, কভার ছবি ও অডিও প্রিভিউ নিয়ন্ত্রণ",
+            icon = Icons.Default.MusicNote,
+            onClick = onNavigateToSounds
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        AdminActionCard(
+            title = "ডিভাইস ফ্লিট নিয়ন্ত্রণ (Device Management)",
+            subtitle = "অনুমোদিত হার্ডওয়্যার ফিঙ্গারপ্রিন্ট ও রিমোট রিভোকেশন",
+            icon = Icons.Default.Smartphone,
+            onClick = onNavigateToDevices
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        AdminActionCard(
             title = "রক্ষণাবেক্ষণ মোড (Maintenance Control)",
-            subtitle = "সার্ভার মেইন্টেন্যান্স ও বার্তা সম্প্রচার নিয়ন্ত্রণ",
+            subtitle = "সার্ভার মেইন্টেন্যান্স ও জরুরি বার্তা সম্প্রচার",
             icon = Icons.Default.Build,
             onClick = onNavigateToMaintenance
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        AdminActionCard(
+            title = "নিরাপত্তা ও অডিট লগ (Audit Logs)",
+            subtitle = "প্রশাসনিক ক্রিয়াকলাপের ক্রিপ্টোগ্রাফিক টাইমস্ট্যাম্প রেকর্ড",
+            icon = Icons.Default.Security,
+            onClick = onNavigateToAuditLogs
         )
     }
 }

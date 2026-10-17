@@ -20,7 +20,7 @@ android {
             useSupportLibrary = true
         }
 
-        buildConfigField("String", "SUPABASE_URL", "\"https://fasjewbwjctonprecuea.supabase.co\"")
+        buildConfigField("String", "SUPABASE_URL", "\"https://qbazzarqiplrqqfytajz.supabase.co\"")
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZhc2pld2J3amN0b25wcmVjdWVhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE2MzQ4NzYsImV4cCI6MjEwNzIxMDg3Nn0.hg8mXdwvvnI2_UdJ60Y2lvQE_56-lO4iyztK_vtvGD8\"")
     }
 

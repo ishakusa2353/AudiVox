@@ -9,6 +9,7 @@
     "start": "node server.js",
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
+    "build:apk": "python3 scripts/build_real_apks.py",
     "lint": "tsc --noEmit"
   },
   "dependencies": {

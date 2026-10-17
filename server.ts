@@ -16,8 +16,11 @@ async function startServer() {
     const filePath = path.resolve(process.cwd(), 'public/downloads', fileName);
 
     if (fs.existsSync(filePath)) {
+      const stat = fs.statSync(filePath);
       res.setHeader('Content-Type', 'application/vnd.android.package-archive');
       res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+      res.setHeader('Content-Length', stat.size);
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       return res.sendFile(filePath);
     } else {
       return res.status(404).json({ error: 'APK file not found on server' });

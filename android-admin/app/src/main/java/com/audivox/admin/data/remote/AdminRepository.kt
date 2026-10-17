@@ -163,6 +163,235 @@ class AdminRepository(context: Context) {
         }
     }
 
+    // Get Dashboard real metrics
+    suspend fun getDashboardStats(): Result<JsonObject> = withContext(Dispatchers.IO) {
+        val token = adminToken ?: return@withContext Result.failure(IllegalStateException("Not authenticated"))
+        try {
+            val stats = JsonObject()
+            
+            // Users count
+            val usersReq = Request.Builder()
+                .url("$baseUrl/rest/v1/profiles?select=id,is_suspended")
+                .header("apikey", anonKey)
+                .header("Authorization", "Bearer $token")
+                .get().build()
+            val uResp = client.newCall(usersReq).execute()
+            val uArr = gson.fromJson(uResp.body?.string().orEmpty(), JsonArray::class.java)
+            stats.addProperty("total_users", uArr.size())
+            val suspendedCount = uArr.count { it.asJsonObject.get("is_suspended")?.asBoolean == true }
+            stats.addProperty("suspended_users", suspendedCount)
+
+            // Licenses count
+            val licReq = Request.Builder()
+                .url("$baseUrl/rest/v1/licenses?select=id,is_active,is_suspended,is_revoked")
+                .header("apikey", anonKey)
+                .header("Authorization", "Bearer $token")
+                .get().build()
+            val lResp = client.newCall(licReq).execute()
+            val lArr = gson.fromJson(lResp.body?.string().orEmpty(), JsonArray::class.java)
+            stats.addProperty("total_licenses", lArr.size())
+            val activeLicCount = lArr.count { 
+                val o = it.asJsonObject
+                o.get("is_active")?.asBoolean == true && o.get("is_suspended")?.asBoolean != true && o.get("is_revoked")?.asBoolean != true
+            }
+            stats.addProperty("active_licenses", activeLicCount)
+
+            // Devices count
+            val devReq = Request.Builder()
+                .url("$baseUrl/rest/v1/devices?select=id,is_revoked")
+                .header("apikey", anonKey)
+                .header("Authorization", "Bearer $token")
+                .get().build()
+            val dResp = client.newCall(devReq).execute()
+            val dArr = gson.fromJson(dResp.body?.string().orEmpty(), JsonArray::class.java)
+            stats.addProperty("total_devices", dArr.size())
+
+            // Sounds count
+            val sndReq = Request.Builder()
+                .url("$baseUrl/rest/v1/sounds?select=id,is_published")
+                .header("apikey", anonKey)
+                .header("Authorization", "Bearer $token")
+                .get().build()
+            val sResp = client.newCall(sndReq).execute()
+            val sArr = gson.fromJson(sResp.body?.string().orEmpty(), JsonArray::class.java)
+            stats.addProperty("published_sounds", sArr.count { it.asJsonObject.get("is_published")?.asBoolean == true })
+
+            stats.addProperty("app_version", "v1.0.0")
+
+            Result.success(stats)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // Fetch users list
+    suspend fun getUsers(): Result<JsonArray> = withContext(Dispatchers.IO) {
+        val token = adminToken ?: return@withContext Result.failure(IllegalStateException("Not authenticated"))
+        try {
+            val req = Request.Builder()
+                .url("$baseUrl/rest/v1/profiles?select=*&order=created_at.desc")
+                .header("apikey", anonKey)
+                .header("Authorization", "Bearer $token")
+                .get().build()
+            val resp = client.newCall(req).execute()
+            val arr = gson.fromJson(resp.body?.string().orEmpty(), JsonArray::class.java)
+            Result.success(arr)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // Toggle user suspension
+    suspend fun toggleUserSuspension(userId: String, isSuspended: Boolean, reason: String = ""): Result<Boolean> = withContext(Dispatchers.IO) {
+        val token = adminToken ?: return@withContext Result.failure(IllegalStateException("Not authenticated"))
+        try {
+            val payload = JsonObject().apply {
+                addProperty("is_suspended", isSuspended)
+                addProperty("suspension_reason", if (isSuspended) reason else null)
+            }
+            val req = Request.Builder()
+                .url("$baseUrl/rest/v1/profiles?id=eq.$userId")
+                .header("apikey", anonKey)
+                .header("Authorization", "Bearer $token")
+                .patch(payload.toString().toRequestBody(jsonMediaType))
+                .build()
+            val resp = client.newCall(req).execute()
+            recordAudit("USER_SUSPENSION_TOGGLED", "profiles", userId, payload)
+            Result.success(resp.isSuccessful)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // Fetch licenses
+    suspend fun getLicenses(): Result<JsonArray> = withContext(Dispatchers.IO) {
+        val token = adminToken ?: return@withContext Result.failure(IllegalStateException("Not authenticated"))
+        try {
+            val req = Request.Builder()
+                .url("$baseUrl/rest/v1/licenses?select=*&order=created_at.desc")
+                .header("apikey", anonKey)
+                .header("Authorization", "Bearer $token")
+                .get().build()
+            val resp = client.newCall(req).execute()
+            val arr = gson.fromJson(resp.body?.string().orEmpty(), JsonArray::class.java)
+            Result.success(arr)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // Revoke license
+    suspend fun revokeLicense(licenseId: String, reason: String = "Revoked by admin"): Result<Boolean> = withContext(Dispatchers.IO) {
+        val token = adminToken ?: return@withContext Result.failure(IllegalStateException("Not authenticated"))
+        try {
+            val payload = JsonObject().apply {
+                addProperty("is_revoked", true)
+                addProperty("revocation_reason", reason)
+            }
+            val req = Request.Builder()
+                .url("$baseUrl/rest/v1/licenses?id=eq.$licenseId")
+                .header("apikey", anonKey)
+                .header("Authorization", "Bearer $token")
+                .patch(payload.toString().toRequestBody(jsonMediaType))
+                .build()
+            val resp = client.newCall(req).execute()
+            recordAudit("LICENSE_REVOKED", "licenses", licenseId, payload)
+            Result.success(resp.isSuccessful)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // Fetch sounds
+    suspend fun getSounds(): Result<JsonArray> = withContext(Dispatchers.IO) {
+        val token = adminToken ?: return@withContext Result.failure(IllegalStateException("Not authenticated"))
+        try {
+            val req = Request.Builder()
+                .url("$baseUrl/rest/v1/sounds?select=*&order=created_at.desc")
+                .header("apikey", anonKey)
+                .header("Authorization", "Bearer $token")
+                .get().build()
+            val resp = client.newCall(req).execute()
+            val arr = gson.fromJson(resp.body?.string().orEmpty(), JsonArray::class.java)
+            Result.success(arr)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // Delete sound
+    suspend fun deleteSound(soundId: String): Result<Boolean> = withContext(Dispatchers.IO) {
+        val token = adminToken ?: return@withContext Result.failure(IllegalStateException("Not authenticated"))
+        try {
+            val req = Request.Builder()
+                .url("$baseUrl/rest/v1/sounds?id=eq.$soundId")
+                .header("apikey", anonKey)
+                .header("Authorization", "Bearer $token")
+                .delete()
+                .build()
+            val resp = client.newCall(req).execute()
+            recordAudit("SOUND_DELETED", "sounds", soundId, JsonObject())
+            Result.success(resp.isSuccessful)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // Fetch devices
+    suspend fun getDevices(): Result<JsonArray> = withContext(Dispatchers.IO) {
+        val token = adminToken ?: return@withContext Result.failure(IllegalStateException("Not authenticated"))
+        try {
+            val req = Request.Builder()
+                .url("$baseUrl/rest/v1/devices?select=*&order=created_at.desc")
+                .header("apikey", anonKey)
+                .header("Authorization", "Bearer $token")
+                .get().build()
+            val resp = client.newCall(req).execute()
+            val arr = gson.fromJson(resp.body?.string().orEmpty(), JsonArray::class.java)
+            Result.success(arr)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // Revoke device
+    suspend fun revokeDevice(deviceId: String): Result<Boolean> = withContext(Dispatchers.IO) {
+        val token = adminToken ?: return@withContext Result.failure(IllegalStateException("Not authenticated"))
+        try {
+            val payload = JsonObject().apply {
+                addProperty("is_revoked", true)
+            }
+            val req = Request.Builder()
+                .url("$baseUrl/rest/v1/devices?id=eq.$deviceId")
+                .header("apikey", anonKey)
+                .header("Authorization", "Bearer $token")
+                .patch(payload.toString().toRequestBody(jsonMediaType))
+                .build()
+            val resp = client.newCall(req).execute()
+            recordAudit("DEVICE_REVOKED", "devices", deviceId, payload)
+            Result.success(resp.isSuccessful)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // Fetch audit logs
+    suspend fun getAuditLogs(): Result<JsonArray> = withContext(Dispatchers.IO) {
+        val token = adminToken ?: return@withContext Result.failure(IllegalStateException("Not authenticated"))
+        try {
+            val req = Request.Builder()
+                .url("$baseUrl/rest/v1/audit_logs?select=*&order=created_at.desc&limit=50")
+                .header("apikey", anonKey)
+                .header("Authorization", "Bearer $token")
+                .get().build()
+            val resp = client.newCall(req).execute()
+            val arr = gson.fromJson(resp.body?.string().orEmpty(), JsonArray::class.java)
+            Result.success(arr)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     private fun recordAudit(action: String, entityType: String, entityId: String, details: JsonObject) {
         val token = adminToken ?: return
         try {

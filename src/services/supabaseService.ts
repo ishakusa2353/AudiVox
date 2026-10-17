@@ -9,8 +9,9 @@ import {
   BuildJob,
   MaintenanceConfig,
 } from '../types';
+import { createSynthWavDataUrl } from '../utils/audioExtractor';
 
-export const DEFAULT_SUPABASE_URL = 'https://fasjewbwjctonprecuea.supabase.co';
+export const DEFAULT_SUPABASE_URL = 'https://qbazzarqiplrqqfytajz.supabase.co';
 export const DEFAULT_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZhc2pld2J3amN0b25wcmVjdWVhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE2MzQ4NzYsImV4cCI6MjEwNzIxMDg3Nn0.hg8mXdwvvnI2_UdJ60Y2lvQE_56-lO4iyztK_vtvGD8';
 
 class SupabaseService {
@@ -164,9 +165,9 @@ class SupabaseService {
       category_name: 'Gaming FX',
       title: 'Headshot Strike',
       description: 'Crisp sniper kill notification SFX',
-      audio_url: 'https://assets.mixkit.co/active_storage/sfx/2874/2874-preview.mp3',
+      audio_url: createSynthWavDataUrl('headshot'),
       duration_ms: 1200,
-      file_format: 'mp3',
+      file_format: 'wav',
       file_size_bytes: 48200,
       tags: ['kill', 'sniper', 'impact'],
       is_published: true,
@@ -178,9 +179,9 @@ class SupabaseService {
       category_name: 'Gaming FX',
       title: 'Victory Horn Fanfare',
       description: 'Triumphant battle win celebration sting',
-      audio_url: 'https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3',
+      audio_url: createSynthWavDataUrl('victory'),
       duration_ms: 3400,
-      file_format: 'mp3',
+      file_format: 'wav',
       file_size_bytes: 98400,
       tags: ['victory', 'fanfare', 'win'],
       is_published: true,
@@ -192,9 +193,9 @@ class SupabaseService {
       category_name: 'Voice Lines',
       title: 'RUSH NOW! Team Callout',
       description: 'Intense squad rush assault voice line',
-      audio_url: 'https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3',
+      audio_url: createSynthWavDataUrl('rush'),
       duration_ms: 2100,
-      file_format: 'mp3',
+      file_format: 'wav',
       file_size_bytes: 67300,
       tags: ['rush', 'squad', 'battle'],
       is_published: true,
@@ -206,9 +207,9 @@ class SupabaseService {
       category_name: 'Memes & Fun',
       title: 'Sad Wah-Wah Trombone',
       description: 'Classic fail sting sound effect',
-      audio_url: 'https://assets.mixkit.co/active_storage/sfx/2955/2955-preview.mp3',
+      audio_url: createSynthWavDataUrl('sad'),
       duration_ms: 2800,
-      file_format: 'mp3',
+      file_format: 'wav',
       file_size_bytes: 84000,
       tags: ['fail', 'funny', 'meme'],
       is_published: true,
@@ -220,9 +221,9 @@ class SupabaseService {
       category_name: 'Anime & Battle',
       title: 'Power Surge Energy Aura',
       description: 'Super Saiyan anime energy charging SFX',
-      audio_url: 'https://assets.mixkit.co/active_storage/sfx/2704/2704-preview.mp3',
+      audio_url: createSynthWavDataUrl('power'),
       duration_ms: 4200,
-      file_format: 'mp3',
+      file_format: 'wav',
       file_size_bytes: 142000,
       tags: ['energy', 'anime', 'aura'],
       is_published: true,
@@ -355,13 +356,24 @@ class SupabaseService {
     this.initClient(savedUrl, savedKey);
     this.isConnectedToLive = true;
 
-    // Load any custom added sounds
+    // Load any custom added sounds, preventing duplicates and purging any duplicate seed items
+    const defaultSeedIds = new Set(['s-1', 's-2', 's-3', 's-4', 's-5']);
     try {
       const stored = localStorage.getItem('audivox_custom_sounds');
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          this.sounds = [...parsed, ...this.sounds];
+          const sanitizedCustom: SoundItem[] = [];
+          const seen = new Set<string>(defaultSeedIds);
+          for (const item of parsed) {
+            if (item && item.id && !seen.has(item.id)) {
+              seen.add(item.id);
+              sanitizedCustom.push(item);
+            }
+          }
+          this.sounds = [...sanitizedCustom, ...this.sounds];
+          // Resave sanitized list so duplicate seed entries never persist
+          localStorage.setItem('audivox_custom_sounds', JSON.stringify(sanitizedCustom));
         }
       }
     } catch (e) {
@@ -508,15 +520,16 @@ class SupabaseService {
   public async createSound(sound: Omit<SoundItem, 'id' | 'created_at' | 'play_count'>): Promise<SoundItem> {
     const newSound: SoundItem = {
       ...sound,
-      id: `s-${Date.now()}`,
+      id: `custom-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
       play_count: 0,
       created_at: new Date().toISOString(),
     };
     this.sounds.unshift(newSound);
     
-    // Save to localStorage
+    // Save to localStorage (only custom sounds, excluding seed IDs)
     try {
-      const customSounds = this.sounds.filter(s => s.id.startsWith('s-'));
+      const defaultSeedIds = new Set(['s-1', 's-2', 's-3', 's-4', 's-5']);
+      const customSounds = this.sounds.filter(s => !defaultSeedIds.has(s.id));
       localStorage.setItem('audivox_custom_sounds', JSON.stringify(customSounds.slice(0, 50)));
     } catch (e) {
       console.warn('Could not persist sounds to localStorage:', e);
@@ -540,7 +553,8 @@ class SupabaseService {
     const deleted = this.sounds.splice(idx, 1)[0];
     
     try {
-      const customSounds = this.sounds.filter(s => s.id.startsWith('s-'));
+      const defaultSeedIds = new Set(['s-1', 's-2', 's-3', 's-4', 's-5']);
+      const customSounds = this.sounds.filter(s => !defaultSeedIds.has(s.id));
       localStorage.setItem('audivox_custom_sounds', JSON.stringify(customSounds));
     } catch (e) {}
 

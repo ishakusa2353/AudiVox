@@ -16,7 +16,13 @@ import {
   Volume2,
 } from 'lucide-react';
 import { SoundItem } from '../types';
-import { processMediaFile, processCoverImage, blobToDataUrl, ExtractedMedia } from '../utils/audioExtractor';
+import {
+  processMediaFile,
+  processCoverImage,
+  blobToDataUrl,
+  ExtractedMedia,
+  playSynthesizedGameSound,
+} from '../utils/audioExtractor';
 
 interface SoundLibraryViewProps {
   sounds: SoundItem[];
@@ -58,17 +64,31 @@ export const SoundLibraryView: React.FC<SoundLibraryViewProps> = ({
 
   // Main list player
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const synthStopRef = useRef<(() => void) | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const imageInputRef = useRef<HTMLInputElement | null>(null);
 
   const categories = ['All', 'Gaming FX', 'Voice Lines', 'Memes & Fun', 'Anime & Battle', 'Custom Uploads'];
 
-  const filteredSounds = sounds.filter(
+  const uniqueSounds = sounds.reduce<SoundItem[]>((acc, curr) => {
+    if (curr && curr.id && !acc.some((x) => x.id === curr.id)) {
+      acc.push(curr);
+    }
+    return acc;
+  }, []);
+
+  const filteredSounds = uniqueSounds.filter(
     (s) => selectedCategory === 'All' || s.category_name === selectedCategory
   );
 
   const handlePlay = (sound: SoundItem) => {
+    // Stop any active Web Audio synth playback
+    if (synthStopRef.current) {
+      synthStopRef.current();
+      synthStopRef.current = null;
+    }
+
     if (playingSoundId === sound.id) {
       if (audioRef.current) {
         audioRef.current.pause();
@@ -79,16 +99,33 @@ export const SoundLibraryView: React.FC<SoundLibraryViewProps> = ({
       if (audioRef.current) {
         audioRef.current.pause();
       }
-      const audio = new Audio(sound.audio_url);
-      audioRef.current = audio;
       setPlayingSoundId(sound.id);
-      audio.play().catch((err) => {
-        console.error('Audio playback error:', err);
-        setPlayingSoundId(null);
-      });
-      audio.onended = () => {
-        setPlayingSoundId(null);
+
+      const playFallback = () => {
+        synthStopRef.current = playSynthesizedGameSound(sound.category_name || sound.title, () => {
+          setPlayingSoundId(null);
+          synthStopRef.current = null;
+        });
       };
+
+      try {
+        const audio = new Audio(sound.audio_url);
+        audioRef.current = audio;
+
+        audio.onended = () => {
+          setPlayingSoundId(null);
+        };
+
+        audio.onerror = () => {
+          playFallback();
+        };
+
+        audio.play().catch(() => {
+          playFallback();
+        });
+      } catch (err) {
+        playFallback();
+      }
     }
   };
 
@@ -162,18 +199,30 @@ export const SoundLibraryView: React.FC<SoundLibraryViewProps> = ({
       }
       setModalAudioPlaying(false);
     } else {
-      if (!modalAudioRef.current) {
-        modalAudioRef.current = new Audio(customAudioUrl);
-        modalAudioRef.current.onended = () => setModalAudioPlaying(false);
-      } else {
-        modalAudioRef.current.src = customAudioUrl;
-      }
-      modalAudioRef.current.play().then(() => {
+      try {
+        if (!modalAudioRef.current) {
+          modalAudioRef.current = new Audio(customAudioUrl);
+          modalAudioRef.current.onended = () => setModalAudioPlaying(false);
+        } else {
+          modalAudioRef.current.src = customAudioUrl;
+        }
+        modalAudioRef.current
+          .play()
+          .then(() => {
+            setModalAudioPlaying(true);
+          })
+          .catch(() => {
+            playSynthesizedGameSound(newCategory || newTitle, () => {
+              setModalAudioPlaying(false);
+            });
+            setModalAudioPlaying(true);
+          });
+      } catch (e) {
+        playSynthesizedGameSound(newCategory || newTitle, () => {
+          setModalAudioPlaying(false);
+        });
         setModalAudioPlaying(true);
-      }).catch((e) => {
-        console.error('Preview error:', e);
-        setModalAudioPlaying(false);
-      });
+      }
     }
   };
 
@@ -342,8 +391,8 @@ export const SoundLibraryView: React.FC<SoundLibraryViewProps> = ({
 
               {sound.tags && sound.tags.length > 0 && (
                 <div className="mt-3 flex items-center gap-1.5 text-[10px] text-slate-400 font-mono flex-wrap">
-                  {sound.tags.map((tag) => (
-                    <span key={tag} className="px-1.5 py-0.5 rounded bg-slate-800/80 text-slate-300">
+                  {sound.tags.map((tag, i) => (
+                    <span key={`${tag}-${i}`} className="px-1.5 py-0.5 rounded bg-slate-800/80 text-slate-300">
                       #{tag}
                     </span>
                   ))}

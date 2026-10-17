@@ -36,37 +36,53 @@ export const Navbar: React.FC<NavbarProps> = ({
         </button>
       </div>
 
-      {/* Zone 2: 4-5 clean single-line nav links */}
-      <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-300">
+      {/* Zone 2: Mode Switcher & Navigation Links */}
+      <nav className="hidden md:flex items-center gap-2 text-xs font-semibold">
+        <button
+          onClick={() => onSelectSection('showcase')}
+          className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all whitespace-nowrap shrink-0 ${
+            activeSection === 'showcase'
+              ? 'bg-gradient-to-r from-cyan-500/25 to-purple-500/25 border border-cyan-400/50 text-cyan-300 shadow-md'
+              : 'text-slate-300 hover:text-white hover:bg-slate-900 border border-transparent'
+          }`}
+        >
+          <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+          <span>🖼️ ৩০-স্ক্রিন শোকেস (Showcase)</span>
+        </button>
+
+        <button
+          onClick={() => onSelectSection('user_app_sim')}
+          className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all whitespace-nowrap shrink-0 ${
+            activeSection === 'user_app_sim'
+              ? 'bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 shadow-sm'
+              : 'text-slate-300 hover:text-white hover:bg-slate-900 border border-transparent'
+          }`}
+        >
+          <Smartphone className="w-3.5 h-3.5 text-cyan-400" />
+          <span>📱 User App (Phone)</span>
+        </button>
+
+        <button
+          onClick={() => onSelectSection('admin_app_sim')}
+          className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all whitespace-nowrap shrink-0 ${
+            activeSection === 'admin_app_sim'
+              ? 'bg-purple-500/20 border border-purple-500/40 text-purple-300 shadow-sm'
+              : 'text-slate-300 hover:text-white hover:bg-slate-900 border border-transparent'
+          }`}
+        >
+          <Shield className="w-3.5 h-3.5 text-purple-400" />
+          <span>🛡️ Admin App (Phone)</span>
+        </button>
+
         <button
           onClick={() => onSelectSection('dashboard')}
-          className={`transition-colors whitespace-nowrap shrink-0 ${activeSection === 'dashboard' ? 'text-cyan-400' : 'hover:text-white'}`}
+          className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all whitespace-nowrap shrink-0 ${
+            activeSection === 'dashboard'
+              ? 'bg-slate-900 border border-slate-700 text-white'
+              : 'text-slate-400 hover:text-white hover:bg-slate-900 border border-transparent'
+          }`}
         >
-          ড্যাশবোর্ড (Overview)
-        </button>
-        <button
-          onClick={() => onSelectSection('licenses')}
-          className={`transition-colors whitespace-nowrap shrink-0 ${activeSection === 'licenses' ? 'text-cyan-400' : 'hover:text-white'}`}
-        >
-          লাইসেন্স জেনারেটর
-        </button>
-        <button
-          onClick={() => onSelectSection('users')}
-          className={`transition-colors whitespace-nowrap shrink-0 ${activeSection === 'users' ? 'text-cyan-400' : 'hover:text-white'}`}
-        >
-          ব্যবহারকারী
-        </button>
-        <button
-          onClick={() => onSelectSection('releases')}
-          className={`transition-colors whitespace-nowrap shrink-0 ${activeSection === 'releases' ? 'text-cyan-400' : 'hover:text-white'}`}
-        >
-          APK রিলিজ সেন্টার
-        </button>
-        <button
-          onClick={() => onSelectSection('sounds')}
-          className={`transition-colors whitespace-nowrap shrink-0 ${activeSection === 'sounds' ? 'text-cyan-400' : 'hover:text-white'}`}
-        >
-          সাউন্ড লাইব্রেরি
+          <span>🖥️ Admin Website</span>
         </button>
       </nav>
 

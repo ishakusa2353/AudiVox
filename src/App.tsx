@@ -11,6 +11,9 @@ import { MaintenanceView } from './components/MaintenanceView';
 import { AuditLogsView } from './components/AuditLogsView';
 import { SchemaView } from './components/SchemaView';
 import { SupabaseConfigModal } from './components/SupabaseConfigModal';
+import { UserAppSimulator, UserAppScreen } from './components/UserAppSimulator';
+import { AdminAppSimulator, AdminAppScreen } from './components/AdminAppSimulator';
+import { ShowcaseGalleryView } from './components/ShowcaseGalleryView';
 import { supabaseService } from './services/supabaseService';
 import {
   UserProfile,
@@ -25,9 +28,11 @@ import {
 } from './types';
 
 export default function App() {
-  const [activeSection, setActiveSection] = useState('dashboard');
+  const [activeSection, setActiveSection] = useState('showcase');
   const [isConfigOpen, setIsConfigOpen] = useState(false);
   const [isLiveConnected, setIsLiveConnected] = useState(supabaseService.isLiveConnected());
+  const [userSimScreen, setUserSimScreen] = useState<UserAppScreen>('home');
+  const [adminSimScreen, setAdminSimScreen] = useState<AdminAppScreen>('dashboard');
 
   // App data state
   const [users, setUsers] = useState<UserProfile[]>([]);
@@ -143,6 +148,19 @@ export default function App() {
     return res;
   };
 
+  const handleLaunchScreen = (type: 'USER' | 'ADMIN' | 'WEBSITE', screenKey?: string) => {
+    if (type === 'USER') {
+      if (screenKey) setUserSimScreen(screenKey as any);
+      setActiveSection('user_app_sim');
+    } else if (type === 'ADMIN') {
+      if (screenKey) setAdminSimScreen(screenKey as any);
+      setActiveSection('admin_app_sim');
+    } else {
+      if (screenKey) setActiveSection(screenKey);
+      else setActiveSection('dashboard');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-cyan-500/20 selection:text-cyan-300">
       {/* Top Navbar adhering to Top Bar Contract */}
@@ -160,6 +178,24 @@ export default function App() {
 
         {/* Viewport Content Area */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
+          {activeSection === 'showcase' && (
+            <ShowcaseGalleryView onSelectScreenForSimulator={handleLaunchScreen} />
+          )}
+
+          {activeSection === 'user_app_sim' && (
+            <UserAppSimulator
+              initialScreen={userSimScreen}
+              onNavigateExternal={setActiveSection}
+            />
+          )}
+
+          {activeSection === 'admin_app_sim' && (
+            <AdminAppSimulator
+              initialScreen={adminSimScreen}
+              onNavigateExternal={setActiveSection}
+            />
+          )}
+
           {activeSection === 'dashboard' && (
             <DashboardView
               users={users}
@@ -235,49 +271,49 @@ export default function App() {
       {/* Mobile Phone Bottom Navigation Bar (Glassmorphic, Android style) */}
       <nav className="lg:hidden sticky bottom-0 z-40 bg-slate-950/85 backdrop-blur-xl border-t border-slate-800/80 px-2 py-2 flex items-center justify-around shadow-2xl">
         <button
+          onClick={() => setActiveSection('showcase')}
+          className={`flex flex-col items-center gap-1 py-1 px-2 rounded-lg text-[10px] font-medium transition-colors ${
+            activeSection === 'showcase' ? 'text-cyan-400 font-bold' : 'text-slate-400'
+          }`}
+        >
+          <span className="text-base">🖼️</span>
+          <span>শোকেস</span>
+        </button>
+        <button
+          onClick={() => setActiveSection('user_app_sim')}
+          className={`flex flex-col items-center gap-1 py-1 px-2 rounded-lg text-[10px] font-medium transition-colors ${
+            activeSection === 'user_app_sim' ? 'text-cyan-400 font-bold' : 'text-slate-400'
+          }`}
+        >
+          <span className="text-base">📱</span>
+          <span>User App</span>
+        </button>
+        <button
+          onClick={() => setActiveSection('admin_app_sim')}
+          className={`flex flex-col items-center gap-1 py-1 px-2 rounded-lg text-[10px] font-medium transition-colors ${
+            activeSection === 'admin_app_sim' ? 'text-purple-400 font-bold' : 'text-slate-400'
+          }`}
+        >
+          <span className="text-base">🛡️</span>
+          <span>Admin App</span>
+        </button>
+        <button
           onClick={() => setActiveSection('dashboard')}
           className={`flex flex-col items-center gap-1 py-1 px-2 rounded-lg text-[10px] font-medium transition-colors ${
-            activeSection === 'dashboard' ? 'text-cyan-400' : 'text-slate-400'
+            activeSection === 'dashboard' ? 'text-cyan-400 font-bold' : 'text-slate-400'
           }`}
         >
           <span className="text-base">📊</span>
-          <span>ড্যাশবোর্ড</span>
+          <span>ওয়েবসাইট</span>
         </button>
         <button
           onClick={() => setActiveSection('licenses')}
           className={`flex flex-col items-center gap-1 py-1 px-2 rounded-lg text-[10px] font-medium transition-colors ${
-            activeSection === 'licenses' ? 'text-cyan-400' : 'text-slate-400'
+            activeSection === 'licenses' ? 'text-cyan-400 font-bold' : 'text-slate-400'
           }`}
         >
           <span className="text-base">🔑</span>
           <span>লাইসেন্স</span>
-        </button>
-        <button
-          onClick={() => setActiveSection('users')}
-          className={`flex flex-col items-center gap-1 py-1 px-2 rounded-lg text-[10px] font-medium transition-colors ${
-            activeSection === 'users' ? 'text-cyan-400' : 'text-slate-400'
-          }`}
-        >
-          <span className="text-base">👥</span>
-          <span>ইউজার</span>
-        </button>
-        <button
-          onClick={() => setActiveSection('releases')}
-          className={`flex flex-col items-center gap-1 py-1 px-2 rounded-lg text-[10px] font-medium transition-colors ${
-            activeSection === 'releases' ? 'text-cyan-400' : 'text-slate-400'
-          }`}
-        >
-          <span className="text-base">📦</span>
-          <span>APK রিলিজ</span>
-        </button>
-        <button
-          onClick={() => setActiveSection('sounds')}
-          className={`flex flex-col items-center gap-1 py-1 px-2 rounded-lg text-[10px] font-medium transition-colors ${
-            activeSection === 'sounds' ? 'text-cyan-400' : 'text-slate-400'
-          }`}
-        >
-          <span className="text-base">🎵</span>
-          <span>সাউন্ড</span>
         </button>
       </nav>
     </div>

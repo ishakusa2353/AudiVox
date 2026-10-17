@@ -9,6 +9,9 @@ import {
   Wrench,
   ShieldAlert,
   FileCode2,
+  Sparkles,
+  Shield,
+  Layers,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -17,8 +20,14 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSelectSection }) => {
+  const topAppModes = [
+    { id: 'showcase', label: '৩০-স্ক্রিন মাস্টার শোকেস', sublabel: '30-Screen UI/UX Showcase', icon: Sparkles, color: 'text-cyan-400' },
+    { id: 'user_app_sim', label: 'User Android App (ফোন)', sublabel: 'Native Phone Simulator (1–10, 19–26)', icon: Smartphone, color: 'text-cyan-400' },
+    { id: 'admin_app_sim', label: 'Admin Android App (ফোন)', sublabel: 'Admin Mobile APK (11–18)', icon: Shield, color: 'text-purple-400' },
+  ];
+
   const navItems = [
-    { id: 'dashboard', label: 'ড্যাশবোর্ড', sublabel: 'Dashboard', icon: LayoutDashboard },
+    { id: 'dashboard', label: 'ড্যাশবোর্ড', sublabel: 'Dashboard (Screen 27)', icon: LayoutDashboard },
     { id: 'users', label: 'ইউজার ম্যানেজমেন্ট', sublabel: 'Users & Profile ID', icon: Users },
     { id: 'licenses', label: 'লাইসেন্স জেনারেটর', sublabel: 'Custom Keys & Limits', icon: Key },
     { id: 'devices', label: 'ডিভাইস ফ্লিট', sublabel: 'Device Limits & Fingerprints', icon: Smartphone },
@@ -31,10 +40,40 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSelectSection
 
   return (
     <aside className="w-64 shrink-0 bg-slate-950 border-r border-slate-800/80 p-4 flex flex-col justify-between hidden lg:flex min-h-[calc(100vh-57px)]">
-      <div className="space-y-1">
-        <div className="px-3 py-2 text-xs font-semibold text-slate-500 uppercase tracking-wider font-mono">
-          অ্যাডমিন কনসোল
+      <div className="space-y-4">
+        {/* Interactive App Modes */}
+        <div className="space-y-1">
+          <div className="px-3 py-1 text-[11px] font-semibold text-cyan-400 uppercase tracking-wider font-mono">
+            মোবাইল অ্যাপ ও শোকেস
+          </div>
+          {topAppModes.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeSection === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => onSelectSection(item.id)}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs transition-all text-left ${
+                  isActive
+                    ? 'bg-gradient-to-r from-cyan-950/50 to-slate-900 text-cyan-300 font-bold border border-cyan-500/40 shadow-sm'
+                    : 'text-slate-300 hover:text-white hover:bg-slate-900/60'
+                }`}
+              >
+                <Icon className={`w-4 h-4 shrink-0 ${item.color}`} />
+                <div className="truncate">
+                  <div className="truncate font-semibold">{item.label}</div>
+                  <div className="text-[10px] text-slate-500 truncate">{item.sublabel}</div>
+                </div>
+              </button>
+            );
+          })}
         </div>
+
+        {/* Admin Website Management Console */}
+        <div className="space-y-1 pt-2 border-t border-slate-800/80">
+          <div className="px-3 py-1 text-[11px] font-semibold text-slate-500 uppercase tracking-wider font-mono">
+            ওয়েবসাইট কন্ট্রোল প্যানেল
+          </div>
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeSection === item.id;
@@ -56,6 +95,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSelectSection
             </button>
           );
         })}
+        </div>
       </div>
 
       <div className="pt-4 border-t border-slate-800/80">
